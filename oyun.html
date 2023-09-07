@@ -1,0 +1,98 @@
+<canvas id="game" width="400" height="400"></canvas>
+<script>
+class SnakeGame { 
+    constructor(){
+        this.canvas = document.getElementById('game'); 
+        this.context = this.canvas.getContext('2d');
+        document.addEventListener('keydown', this.onKeyPress.bind(this)); 
+    }
+    init() {
+this.posiyionX = this.posiyionY = 10;//Yılanın Başlangıçtaki konumunu belirttim
+this.appleX = this.appleY = 5;//Elmanın Başlangıçtaki konumunu belirttim
+this.tailSize = 5; //Yılanın başlangıçtaki uzunluğu
+this.trail = []; // Yılanın karelerinin kordinatlarını tutacak olan array
+this.gridSize = this.tileCount = 20 ; //Ekranı böldük 20 20
+this.velocityX = this.velocityY = 0; //ivmenin hangi yönde olduğunu takip edeceğim değişken
+this.timer = setInterval(this.loop.bind(this), 1000/15); 
+    }
+    reset() {
+        clearInterval(this.timer);
+        this.init();
+    }
+    loop() {
+        this.update();
+        this.draw();
+
+    }
+    update() {
+        this.posiyionX += this.velocityX;
+        this.posiyionY += this.velocityY;
+       
+        if(this.posiyionX < 0){ //sol kenara çarptıysa
+            this.posiyionX = this.tileCount -1; //sağdan çıksın
+        }
+        if(this.posiyionY < 0){ 
+            this.posiyionY = this.tileCount - 1;
+        }
+        if(this.posiyionX > this.tileCount - 1){ 
+            this.posiyionX = 0;
+        }
+        if(this.posiyionY > this.tileCount - 1){ 
+            this.posiyionY = 0;
+        }
+this.trail.forEach(t =>{
+    if(this.posiyionX === t.posiyionX && this.posiyionY === t.posiyionY){ //yılan kendi üstüne basmışsa
+        this.reset();
+    }
+    });
+this.trail.push({posiyionX:this.posiyionX, posiyionY: this.posiyionY});
+
+while(this.trail.length > this.tailSize){
+    this.trail.shift();
+}
+if(this.appleX === this.posiyionX && this.appleY === this.posiyionY){ //yılan elmayı yediyse
+    this.tailSize++; //yılan uzasın
+    this.appleX = Math.floor(Math.random() * this.tileCount); //elma rastgele bir yere geçsin
+    this.appleY = Math.floor(Math.random() * this.tileCount);
+}
+    }
+    draw() {
+this.context.fillStyle = 'black';
+this.context.fillRect(0, 0, this.canvas.width, this.canvas.height);
+
+this.context.fillStyle = 'white';
+this.context.font = '20px Arial';
+this.context.fillText(this.tailSize - 5, 20, 40);
+
+this.context.fillStyle = 'yellow';
+this.trail.forEach(t => {
+    this.context.fillRect(t.posiyionX * this.gridSize, t.posiyionY * this.gridSize, this.gridSize - 5, this.gridSize - 5);
+});
+this.context.fillStyle = 'red';
+this.context.fillRect(this.appleX * this.gridSize, this.appleY * this.gridSize, this.gridSize - 5, this.gridSize - 5);
+
+    }
+    onKeyPress(e){
+        if(e.keyCode == 37 && this.velocityX != 1){ //kullanıcı sola bastıysa ve yılan sağa gitmiyorsa
+        this.velocityX = -1;
+        this.velocityY = 0; 
+    }
+    if(e.keyCode == 38 && this.velocityY != 1){ //kullanıcı sola bastıysa ve yılan sağa gitmiyorsa
+        this.velocityX = 0;
+        this.velocityY = -1; 
+    }
+    if(e.keyCode == 39 && this.velocityX != -1) {//kullanıcı sola bastıysa ve yılan sağa gitmiyorsa
+        this.velocityX = 1;
+        this.velocityY = 0; 
+    }
+    if(e.keyCode == 40 && this.velocityY != -1) {//kullanıcı sola bastıysa ve yılan sağa gitmiyorsa
+        this.velocityX = 0;
+        this.velocityY = 1; 
+    }
+
+}
+}
+const game = new SnakeGame();
+window.onload = () => game.init();
+
+</script>
